@@ -30,7 +30,7 @@ Where the Tree is a compressed and hashed version of the current state of the wo
 
 In Typescript, think about making a type of object that has this properties
 
-    ```ts
+    ```js
     interface Commit {
         Author: string,
         CommitMsg: string,
