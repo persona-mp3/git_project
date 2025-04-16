@@ -88,15 +88,6 @@ func (commit *Commit) Commit(msg string) {
 		Id: fmt.Sprintf("m%s", uuid.New().String()),
 	}
 
-	// we need to first check cache history if theres any one before it 
-	// [node1, node2, node3]
-	// node4??
-	// 
-	// if len(cache) === 0; commit.Parent = nil | hashId
-	// parentCommit = cache[(len(cache) -1)]
-	// commit.Parent = &parentCommit
-	// parent := commit.Parent
-	// var hashId2 Commit
 	commitTime := time.Now()
 
 	if len(commitCache) == 0 {
@@ -175,7 +166,7 @@ func main() {
 	repo.Commit("feat: caching fixed")
 	repo.Commit("feat: object database")
 	ShowCommitHistory()
-	GitDatabase()
+	// GitDatabase()
 	// fmt.Printf("%+v\n", repo)
-	SeeGitStore()
+	// SeeGitStore()
 }
