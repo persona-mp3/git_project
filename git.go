@@ -40,12 +40,11 @@ type Branch struct {
 	ParentCommit *Commit 
 }
 
-type GitDB []Git
+type GitStore []Git
 type CommitCache []Commit
 
 
 func Init() *Commit{
-	// now := time.Now()
 	hashId := HashId {
 		Id: "[no commits yet]",
 	}
@@ -93,7 +92,7 @@ func (commit *Commit) Commit(msg string) {
 	// [node1, node2, node3]
 	// node4??
 	// 
-	// if len(cache) === 0; commit.Parent = nil
+	// if len(cache) === 0; commit.Parent = nil | hashId
 	// parentCommit = cache[(len(cache) -1)]
 	// commit.Parent = &parentCommit
 	// parent := commit.Parent
@@ -123,7 +122,43 @@ func (commit *Commit) Commit(msg string) {
 }
 
 
+var gitStore GitStore
+func GitDatabase() {
+	// iterates through the cache
+	// and then stores data in key value pairs
+	// where the key is the hashId of the commit 
+	// and the value is the actual commitMetaData
+		
+	if len(commitCache) == 0 {
+		return 
+	}
 
+	fmt.Println("GIT STORE")
+
+	for i, _ := range commitCache {
+		newRow := Git {
+			Key: &commitCache[i].HashId,
+			Object : &commitCache[i],
+		}
+		// this is supposed to be immutable btw
+		gitStore = append(gitStore, newRow)
+	}
+		fmt.Println(gitStore)
+}
+
+func SeeGitStore() {
+	table := table.New(os.Stdout)
+	table.SetHeaders("Key/HashCodes", "Objects/Commits")
+
+	for _, row := range gitStore {
+
+		key := row.Key.Id	
+		commitMsg := row.Object.CommitMsg
+		table.AddRow(key, commitMsg)
+	}
+
+	table.Render()
+}
 
 
 
@@ -137,7 +172,10 @@ func main() {
 	repo := Init()
 	repo.Commit("inital commit")
 	repo.Commit("added new structs:")
-	repo.Commit("cache as global var:")
+	repo.Commit("feat: caching fixed")
+	repo.Commit("feat: object database")
 	ShowCommitHistory()
+	GitDatabase()
 	// fmt.Printf("%+v\n", repo)
+	SeeGitStore()
 }
