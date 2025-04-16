@@ -30,7 +30,7 @@ Where the Tree is a compressed and hashed version of the current state of the wo
 
 In Typescript, think about making a type of object that has this properties
 
-    ```js
+    ```go
     interface Commit {
         Author: string,
         CommitMsg: string,
@@ -50,7 +50,7 @@ This is written in Go as if you would need to run the code, you would need to en
 
 To check if it was successfully installed, run this:
 
-```go --version``
+```go --version```
 
 
 Then to run the main file:
