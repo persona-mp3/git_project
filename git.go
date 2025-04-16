@@ -6,6 +6,7 @@ import (
 
 	"os"
 	"github.com/aquasecurity/table"
+	"github.com/google/uuid" 
 )
 
 type Git struct {
@@ -71,11 +72,12 @@ var commitCache CommitCache
 
 func ShowCommitHistory() {
 	table := table.New(os.Stdout)
-	table.SetHeaders("hashID", "author", "commitMsg", "branch", "commitedAt")
+	table.SetHeaders("hashID", "author", "commitMsg", "branch", "commitedAt", "parentCommit")
 	
 	for _, commit := range commitCache {
 		formattedTime := commit.CommitedAt.Format("Jan 2, 2006 3:04 PM")
-		table.AddRow(commit.HashId.Id, commit.Author, commit.CommitMsg, commit.Master, formattedTime)
+		parentCommit := commit.Parent.Id
+		table.AddRow(commit.HashId.Id, commit.Author, commit.CommitMsg, commit.Master, formattedTime, parentCommit)
 	}
 
 	table.Render()
@@ -84,18 +86,39 @@ func ShowCommitHistory() {
 
 func (commit *Commit) Commit(msg string) {
 	hashId := HashId {
-		Id: fmt.Sprintf("m%07d", time.Now().UnixNano() % 10000000),
+		Id: fmt.Sprintf("m%s", uuid.New().String()),
 	}
 
+	// we need to first check cache history if theres any one before it 
+	// [node1, node2, node3]
+	// node4??
+	// 
+	// if len(cache) === 0; commit.Parent = nil
+	// parentCommit = cache[(len(cache) -1)]
+	// commit.Parent = &parentCommit
+	// parent := commit.Parent
+	// var hashId2 Commit
 	commitTime := time.Now()
-	commit.HashId = hashId
-	commit.CommitMsg = msg
-	commit.CommitedAt = commitTime
-	// commit.CommitedAt = commitTime.Format("Jan 2, 2006 3:04 PM")
+
+	if len(commitCache) == 0 {
+		commit.Parent = &hashId 
+		commit.HashId = hashId
+		commit.CommitMsg = msg
+		commit.CommitedAt = commitTime
+	} else {
+		prevCommit := commitCache[(len( commitCache) -1) ]
+		// fmt.Println("PREVIOUS COMMIT?????")
+		// fmt.Printf("%+v\n",prevCommit)
+		parentId := prevCommit.HashId
+		commit.Parent = &parentId
+		commit.HashId = hashId
+		commit.CommitMsg = msg
+		commit.CommitedAt = commitTime
+	}
 
 	commitCache = append(commitCache, *commit)
 	fmt.Println("[new commit added]")
-	fmt.Println("COMMIT CACHE")
+	// fmt.Println("COMMIT CACHE")
 	// fmt.Println(commitCache)
 }
 
@@ -116,5 +139,5 @@ func main() {
 	repo.Commit("added new structs:")
 	repo.Commit("cache as global var:")
 	ShowCommitHistory()
-	fmt.Printf("%+v\n", repo)
+	// fmt.Printf("%+v\n", repo)
 }
