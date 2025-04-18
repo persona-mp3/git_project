@@ -10,7 +10,14 @@ With this project, I'm recreating the architecture of GIT taking into account th
 - Branches: Branches are pointers to a specific line of commits. A branch points to the latest commit in a sequence. For example, Master will point to the 5th commit in its "timeline" and a new branch "dev" will only point to commits in it's time line.
 
 An analogy would be like, a Green Drone (##master) will only watch what happens in the Section1 (#commits) , while the Red Drone (##dev) will only watch what happens in Section2. But Section1 && Section2 share a common wall, to be more specific, Section2 will always point to Section1s latest change, still adhering to the DAG Model.
+![alt text](image-2.png)
 
+![alt text](image-3.png)
+
+![alt text](image-4.png)
+
+
+![alt text](image-5.png)
 
 - Commits: Commits are basically objects that store details about a particular project in time. Think about it like this
 
