@@ -24,15 +24,46 @@ type Commit struct {
 	Id HashId
 }
 
+
+type Header struct {
+	WorkingBranch *Branch
+}
+
+
 	// var branchCache BranchCache
-	var commitCache CommitCache
-	var master Branch  
+var commitCache CommitCache
+var master Branch  
+var branchCache BranchCache
+
+var currDir Header
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 func newCommit(msg string) {
 	hashId := HashId {
 		Id: fmt.Sprintf("m%s", uuid.New().String()), 
 	}
-	fmt.Println("hashId", hashId)
+
+	currDir.WorkingBranch = &master
+	// fmt.Println("hashId", hashId)
+
+	// branchCache = append(branchCache, master)
 
 	commit := Commit {
 		CommitMsg: msg,
@@ -52,35 +83,56 @@ func newCommit(msg string) {
 
 
 }
+
  func updateMasterBranch() {
 	if len(commitCache) == 0 {
 		return
 	}
-
-
-	master.Name = "[[MASTER]]"
+	master.Name = "MASTER"
 	latestCommit := commitCache[len(commitCache)-1].Id 
 	master.LatestCommit = &latestCommit
-	// fmt.Println("---- POINTING AT COMMIT ---")
-	// fmt.Printf("%+v\n", *master.LatestCommit)
-
-
 }
 
-func  CheckoutC(id int) {
+
+
+func NewBranch(branch string) {
+	// we'll need to transfer to using a map instead of strings instead to just avoid duplicates
+	// then we can get what the latest commits these branches have
+	branchCache = append(branchCache, master)
+
+	newBranch := Branch {
+		Name: branch,
+		LatestCommit: master.LatestCommit,
+	}
+
+	currDir.WorkingBranch = &newBranch
+
+	branchCache = append(branchCache, newBranch)
+
+	fmt.Println("\nNEW BRANCH CREATED")
+	fmt.Println("currently pointing from latest commit", *newBranch.LatestCommit)
 	
-	fmt.Println(id)
+
+	fmt.Println("HEADER CURRENTLY POINTING AT BRANCH-->", currDir.WorkingBranch.Name)
+}
+
+func  LatestCommit(id int) {
+	// if we need to checkout, we need to actually recurse through the commitHistory 	
+	// fmt.Println(id)
 	fmt.Println("LATEST COMMIT", *master.LatestCommit)
 }
-
 
 func main() {
 	newCommit("kagefummi")
 	newCommit("darkFantasy")
 	newCommit("lumiere")
 	newCommit("honwiyomu")
-	defer CheckoutC(5)
-	
+	LatestCommit(5)
+
+	NewBranch("*branching")
+	NewBranch("*BUGSS")
+	fmt.Println("\nBRANCH CACHE BELOW")
+	fmt.Println(branchCache)
 
 	// updateBranch()
 }
