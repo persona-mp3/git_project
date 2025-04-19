@@ -96,6 +96,12 @@ func newCommit(msg string) {
 
 
 func NewBranch(branch string) {
+	for _, inCache := range branchCache{
+		if inCache.Name == branch || master.Name == inCache.Name {
+			continue
+		}
+	}
+
 	// we'll need to transfer to using a map instead of strings instead to just avoid duplicates
 	// then we can get what the latest commits these branches have
 	branchCache = append(branchCache, master)

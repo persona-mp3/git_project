@@ -14,8 +14,6 @@ type Git struct {
 	Object *Commit
 }
 
-
-
 type Commit struct {
 	Parent *HashId
 	HashId HashId
@@ -37,14 +35,24 @@ type HashId struct {
 }
 
 type Branch struct {
-	ParentCommit *Commit 
+	Name string
+	LatestCommit *HashId
 }
 
 type GitStore []Git
 type CommitCache []Commit
+type BranchCache []Branch
+
+var branches BranchCache
+var master Branch
+var commitCache CommitCache
+
 
 
 func Init() *Commit{
+	master.Name = "master"
+	branches = append(branches, master)
+
 	hashId := HashId {
 		Id: "[no commits yet]",
 	}
@@ -57,7 +65,6 @@ func Init() *Commit{
 		CommitMsg:"[no commits yet]" ,
 		Master: "[master]",
 		ExternalBranch: nil,
-		// CommitedAt: time.Time, 
 	}
 	
 
@@ -65,9 +72,6 @@ func Init() *Commit{
 	return &repo
 }
 
-
-
-var commitCache CommitCache
 
 func ShowCommitHistory() {
 	table := table.New(os.Stdout)
@@ -83,37 +87,42 @@ func ShowCommitHistory() {
 }
 
 
+func updateMaster() {
+	master.LatestCommit = &commitCache[len(commitCache)-1].HashId
+}
+
+func updateCommitCache(commit *Commit) {
+	commitCache = append(commitCache, *commit)
+}
+
 func (commit *Commit) Commit(msg string) {
 	hashId := HashId {
-		Id: fmt.Sprintf("m%s", uuid.New().String()),
+		Id: uuid.New().String(),
 	}
 
 	commitTime := time.Now()
 
-	if len(commitCache) == 0 {
+	commit.HashId = hashId
+	commit.CommitedAt = commitTime
+	commit.CommitMsg = msg
+	
+	if len(commitCache) < 1 {
 		commit.Parent = &hashId 
-		commit.HashId = hashId
-		commit.CommitMsg = msg
-		commit.CommitedAt = commitTime
-	} else {
-		prevCommit := commitCache[(len( commitCache) -1) ]
-		// fmt.Println("PREVIOUS COMMIT?????")
-		// fmt.Printf("%+v\n",prevCommit)
-		parentId := prevCommit.HashId
-		commit.Parent = &parentId
-		commit.HashId = hashId
-		commit.CommitMsg = msg
-		commit.CommitedAt = commitTime
+		master.LatestCommit = &hashId
+		updateCommitCache(commit)
+		return
 	}
-
-	commitCache = append(commitCache, *commit)
-	fmt.Println("[new commit added]")
-	// fmt.Println("COMMIT CACHE")
-	// fmt.Println(commitCache)
+	
+	commit.Parent = &commitCache[len(commitCache)-1].HashId
+	updateCommitCache(commit)
+	updateMaster()
+	fmt.Println("\n[new commit addedd...]\n")
+	return
 }
 
 
 var gitStore GitStore
+
 func GitDatabase() {
 	// iterates through the cache
 	// and then stores data in key value pairs
@@ -137,6 +146,7 @@ func GitDatabase() {
 		fmt.Println(gitStore)
 }
 
+
 func SeeGitStore() {
 	table := table.New(os.Stdout)
 	table.SetHeaders("Key/HashCodes", "Objects/Commits")
@@ -153,20 +163,13 @@ func SeeGitStore() {
 
 
 
-
-
-
-
-
-
 func main() {
 	repo := Init()
 	repo.Commit("inital commit")
 	repo.Commit("added new structs:")
 	repo.Commit("feat: caching fixed")
-	repo.Commit("feat: object database")
+	
+	fmt.Println(*master.LatestCommit)
 	ShowCommitHistory()
 	// GitDatabase()
-	// fmt.Printf("%+v\n", repo)
-	// SeeGitStore()
 }
