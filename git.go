@@ -68,13 +68,15 @@ func Init() *Commit{
 	}
 	
 
-	fmt.Println("[initialised new git repository]")
+	fmt.Println("\n[initialised new git repository]")
 	return &repo
 }
 
 
+
 func ShowCommitHistory() {
 	table := table.New(os.Stdout)
+	fmt.Println("\n---------COMMIT HISTORY-----------\n")
 	table.SetHeaders("hashID", "author", "commitMsg", "branch", "commitedAt", "parentCommit")
 	
 	for _, commit := range commitCache {
@@ -88,11 +90,12 @@ func ShowCommitHistory() {
 
 
 func updateMaster() {
-	master.LatestCommit = &commitCache[len(commitCache)-1].HashId
+	branches[0].LatestCommit = &commitCache[len(commitCache)-1].HashId
 }
 
 func updateCommitCache(commit *Commit) {
 	commitCache = append(commitCache, *commit)
+	updateGitStore()
 }
 
 func (commit *Commit) Commit(msg string) {
@@ -108,68 +111,84 @@ func (commit *Commit) Commit(msg string) {
 	
 	if len(commitCache) < 1 {
 		commit.Parent = &hashId 
-		master.LatestCommit = &hashId
+		// assuming master is the firstBranch
+		branches[0].LatestCommit = &hashId
+		fmt.Println("\n[new commit added ...]")
 		updateCommitCache(commit)
+		// return *commit
 		return
 	}
 	
 	commit.Parent = &commitCache[len(commitCache)-1].HashId
 	updateCommitCache(commit)
 	updateMaster()
-	fmt.Println("\n[new commit addedd...]\n")
+	fmt.Println("\n[new commit added ...]")
+	// return *commit
 	return
+}
+
+func (commit *Commit) CheckoutB(name string) {
+	newBranch := Branch {
+		Name: name,
+		LatestCommit: (branches[len(branches)-1].LatestCommit),
+	}
+
+	branches = append(branches, newBranch)
+	fmt.Println("[new branch added]")
+	fmt.Printf("%+v\n", branches)
+
 }
 
 
 var gitStore GitStore
-
-func GitDatabase() {
-	// iterates through the cache
-	// and then stores data in key value pairs
-	// where the key is the hashId of the commit 
-	// and the value is the actual commitMetaData
-		
-	if len(commitCache) == 0 {
-		return 
+func updateGitStore() {
+	if len(commitCache) == 0  {
+		return
 	}
 
-	fmt.Println("GIT STORE")
-
-	for i, _ := range commitCache {
-		newRow := Git {
-			Key: &commitCache[i].HashId,
-			Object : &commitCache[i],
-		}
-		// this is supposed to be immutable btw
-		gitStore = append(gitStore, newRow)
+	currCommit := commitCache[len(commitCache)-1]
+	newRow := Git {
+		Key: &currCommit.HashId,
+		Object : &currCommit,
 	}
-		fmt.Println(gitStore)
+
+	gitStore = append(gitStore, newRow)
+	// fmt.Println("[git store updated]")
+	// fmt.Println(gitStore)
+	return
+	
 }
 
-
-func SeeGitStore() {
+func PrintDb() {
 	table := table.New(os.Stdout)
-	table.SetHeaders("Key/HashCodes", "Objects/Commits")
+	table.SetHeaders("#id", "Commit")
+	
+	fmt.Println("\n-----------RENDERING GIT STORE------------\n")
 
-	for _, row := range gitStore {
-
-		key := row.Key.Id	
-		commitMsg := row.Object.CommitMsg
-		table.AddRow(key, commitMsg)
+	for _, commit := range gitStore {
+		hashId := *commit.Key
+		commitMsg := commit.Object.CommitMsg 
+		table.AddRow(hashId.Id, commitMsg)
 	}
-
 	table.Render()
 }
 
 
 
+
 func main() {
+	
 	repo := Init()
+
 	repo.Commit("inital commit")
 	repo.Commit("added new structs:")
-	repo.Commit("feat: caching fixed")
+	repo.Commit("working on gitStore")
+
+	// getId := repo.Commit("feat: configured branching").HashId
+	// fmt.Println(getId)
+	// fmt.Println(*branches[0].LatestCommit)
+	// [lines 10 and 13 must return the same value]
 	
-	fmt.Println(*master.LatestCommit)
 	ShowCommitHistory()
-	// GitDatabase()
+	PrintDb()
 }
