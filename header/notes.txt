@@ -1,0 +1,31 @@
+```
+	aphex.NCommit("xtal by AphexTwin", "xc_234800u24412")
+	aphex.NCommit("stoneinFocus", "sfc_094800s24212")
+
+	CheckoutB("soundcloudId")
+	CheckoutB("spotify")
+
+```
+
+Instead of making the checkout a new function, we can modify it into a method
+Add a feature that allows for checkout if no previous branch already exists...
+that means that master only exists upon FIRST commit 
+
+//      
+So if a checkout is made before any previous branch, that should also work?? might just decide to be stingy about it lowkeyy.
+
+
+And then we'll need to avoid gloabl states and introduce JSON serialisation ie 
+ * encoding/json 
+ * os 
+ So we can start writing commits to discs
+ And then read commandline arguments.
+
+
+ * New Features
+ - Recursion for traversing back to specific Commits.
+
+ _ ReactUI (if i have to, more details will be provided later on)
+ 
+ 
+ - ASCII Graph rendering for CLI to match diagram representations on  README.md file @git_project repo
